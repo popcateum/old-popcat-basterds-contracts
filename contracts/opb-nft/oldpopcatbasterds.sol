@@ -4,19 +4,91 @@ pragma solidity ^0.8.7;
 
 import "../openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "../openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "../openzeppelin/contracts/security/Pausable.sol";
 import "../openzeppelin/contracts/access/Ownable.sol";
 import "../openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
-import "../openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
-import "../openzeppelin/contracts/token/ERC721/extensions/draft-ERC721Votes.sol";
 import "../openzeppelin/contracts/utils/Counters.sol";
+import "../openzeppelin/contracts/mocks/ECDSAMock.sol";
+import "../openzeppelin/contracts/mocks/SignatureCheckerMock.sol";
 
-contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable, EIP712, ERC721Votes {
+contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable, ReentrancyGuard, ECDSAMock, SignatureCheckerMock {
 	using Counters for Counters.Counter;
 
+	Counters.Counter private _2015Counter;
+	Counters.Counter private _2016Counter;
+	Counters.Counter private _2017Counter;
+	Counters.Counter private _2018Counter;
+	Counters.Counter private _2019Counter;
+	Counters.Counter private _2020Counter;
+	Counters.Counter private _2021Counter;
+	Counters.Counter private _2022Counter;
 	Counters.Counter private _tokenIdCounter;
 
-	constructor() ERC721("OldPopcatBasterds", "OPB") EIP712("OldPopcatBasterds", "1") {}
+	address public wlSigner;
+	string private _baseTokenURI;
+	uint256 constant MAX_AMOUNT = 10000;
+	bool private isRevealed = false;
+	mapping(uint256 => uint256) private _tokenMaximumAmount;
+	mapping(uint256 => uint256) public tokenYear;
+
+	constructor(address _signer, string memory _uri) ERC721("OldPopcatBasterds", "OPB") {
+		wlSigner = _signer;
+		setBaseURI(_uri);
+	}
+
+	modifier isNotContract() {
+		require(msg.sender == tx.origin, "Sender is not EOA");
+		_;
+	}
+
+	modifier mintFee() {
+		require(msg.value >= 0.01 ether);
+		_;
+	}
+
+	modifier checkMintCount(uint256 _year) {
+		require(MAX_AMOUNT > _tokenIdCounter.current(), "Maximum number of NFTs reached.");
+
+		bool _isMint;
+		if (_year == 0) {
+			_isMint = _tokenMaximumAmount[_year] > _2015Counter.current();
+		} else if (_year == 1) {
+			_isMint = _tokenMaximumAmount[_year] > _2016Counter.current();
+		} else if (_year == 2) {
+			_isMint = _tokenMaximumAmount[_year] > _2017Counter.current();
+		} else if (_year == 3) {
+			_isMint = _tokenMaximumAmount[_year] > _2018Counter.current();
+		} else if (_year == 4) {
+			_isMint = _tokenMaximumAmount[_year] > _2019Counter.current();
+		} else if (_year == 5) {
+			_isMint = _tokenMaximumAmount[_year] > _2020Counter.current();
+		} else if (_year == 6) {
+			_isMint = _tokenMaximumAmount[_year] > _2021Counter.current();
+		} else if (_year == 7) {
+			_isMint = _tokenMaximumAmount[_year] > _2022Counter.current();
+		} else {
+			revert("This is not the year that supports minting.");
+		}
+		require(_isMint, "You have exceeded the maximum number of minting.");
+
+		_;
+	}
+
+	modifier checkHash(
+		address _to,
+		uint256 _createAt,
+		bytes32 _hash
+	) {
+		bytes32 veriftyHash = keccak256(abi.encodePacked(_to, _createAt, address(this)));
+		require(toEthSignedMessageHash(_hash) == veriftyHash, "Hash does not match.");
+		_;
+	}
+
+	modifier checkSign(bytes32 _hash, bytes memory _signature) {
+		require(isValidSignatureNow(address(wlSigner), _hash, _signature), "Signature does not match.");
+		_;
+	}
 
 	function pause() public onlyOwner {
 		_pause();
@@ -26,10 +98,65 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		_unpause();
 	}
 
-	function safeMint(address to) public onlyOwner {
-		uint256 tokenId = _tokenIdCounter.current();
+	function mint(
+		address _to,
+		uint256 _createdAt,
+		bytes32 _hash,
+		bytes memory _signature
+	) public payable nonReentrant mintFee checkMintCount(_createdAt) checkHash(_to, _createdAt, _hash) checkSign(_hash, _signature) isNotContract {
 		_tokenIdCounter.increment();
-		_safeMint(to, tokenId);
+		uint256 tokenId = _tokenIdCounter.current();
+		tokenYear[tokenId] = _createdAt;
+		_mintCounter(_createdAt);
+		_mint(_to, tokenId);
+	}
+
+	function setMaximunAmount(uint256[] memory amounts) public onlyOwner {
+		for (uint256 i = 0; i < amounts.length; i++) {
+			_tokenMaximumAmount[i] = amounts[i];
+		}
+	}
+
+	function tokenURI(uint256 _tokenId) public view override returns (string memory) {
+		require(_exists(_tokenId), "ERC721Metadata: URI query for nonexistent token");
+		if (!isRevealed) {
+			return string(abi.encodePacked(_baseURI(), Strings.toString(tokenYear[_tokenId])));
+		}
+		return string(abi.encodePacked(_baseURI(), Strings.toString(_tokenId)));
+	}
+
+	function setBaseURI(string memory _uri) public onlyOwner {
+		_baseTokenURI = _uri;
+	}
+
+	function setIsReveal(bool _isReveal) external onlyOwner {
+		isRevealed = _isReveal;
+	}
+
+	function _mintCounter(uint256 _year) internal {
+		if (_year == 0) {
+			_2015Counter.increment();
+		} else if (_year == 1) {
+			_2016Counter.increment();
+		} else if (_year == 2) {
+			_2017Counter.increment();
+		} else if (_year == 3) {
+			_2018Counter.increment();
+		} else if (_year == 4) {
+			_2019Counter.increment();
+		} else if (_year == 5) {
+			_2020Counter.increment();
+		} else if (_year == 6) {
+			_2021Counter.increment();
+		} else if (_year == 7) {
+			_2022Counter.increment();
+		} else {
+			revert("This is not the year that supports minting.");
+		}
+	}
+
+	function _baseURI() internal view virtual override returns (string memory) {
+		return _baseTokenURI;
 	}
 
 	function _beforeTokenTransfer(
@@ -46,7 +173,7 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		address from,
 		address to,
 		uint256 tokenId
-	) internal override(ERC721, ERC721Votes) {
+	) internal override(ERC721) {
 		super._afterTokenTransfer(from, to, tokenId);
 	}
 
