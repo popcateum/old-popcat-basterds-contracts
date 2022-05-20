@@ -102,7 +102,8 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		bytes memory _signature
 	) {
 		bytes32 veriftyHash = keccak256(abi.encodePacked(_to, _createdAt, address(this)));
-		require(_hash == veriftyHash, "Hash does not match.");
+		bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", veriftyHash));
+		require(_hash == signedHash, "Hash does not match.");
 		require(isValidSignatureNow(address(wlSigner), _hash, _signature), "Signature does not match.");
 		_;
 	}
