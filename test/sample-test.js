@@ -28,22 +28,24 @@ describe("Sign test", function () {
         [validUser.address, '1', opb.address]
       );
 
-      console.log("messageHash:"+ messageHash);
       //32 bytes array 를 Uint8 array로 형변환
       let messageHashBinary = await ethers.utils.arrayify(messageHash);
-      console.log("messageHashBinary:"+ messageHashBinary);
 
-      //서명
+      //정상서명
       let validSignature = await signer.signMessage(messageHashBinary);
       
-      //잘못된서명
+      //잘못된서명자
       let invalidSignature = await validUser.signMessage(messageHashBinary);
-      
 
     //-- 백엔드 종료 --//
 
-    //계약에서 서명 검증
+    //다른 서명자가 서명한 경우
     await expect(opb.connect(validUser).isDataValid('1', messageHashBinary, invalidSignature)).to.be.revertedWith("Invalid signature");
+
+    //정상 서명 + 정상 메시지
     expect(await opb.connect(validUser).isDataValid('1', messageHashBinary, validSignature)).to.be.true;
+
+    //정상 서명 + 정상 메시지이지만 다른 유저가 요청(minx tx)한 경우
+    expect(await opb.connect(invalidUser).isDataValid('1', messageHashBinary, validSignature)).to.be.false;
   });
 });
