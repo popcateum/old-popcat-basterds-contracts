@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.7;
+pragma solidity ^0.8.9;
 
 import "../openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "../openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
@@ -9,11 +9,13 @@ import "../openzeppelin/contracts/security/Pausable.sol";
 import "../openzeppelin/contracts/access/Ownable.sol";
 import "../openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "../openzeppelin/contracts/utils/Counters.sol";
-import "../openzeppelin/contracts/mocks/SignatureCheckerMock.sol";
+import "../openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import "../openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 
-contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable, ReentrancyGuard, SignatureCheckerMock, EIP712 {
+contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable, ReentrancyGuard, EIP712 {
 	using Counters for Counters.Counter;
+	using SignatureChecker for address;
+	using ECDSA for bytes32;
 
 	Counters.Counter private _2015Counter;
 	Counters.Counter private _2016Counter;
@@ -95,19 +97,6 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		_;
 	}
 
-	modifier checkHashSign(
-		address _to,
-		uint256 _createdAt,
-		bytes32 _hash,
-		bytes memory _signature
-	) {
-		bytes32 veriftyHash = keccak256(abi.encodePacked(_to, _createdAt, address(this)));
-		bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", veriftyHash));
-		require(_hash == signedHash, "Hash does not match.");
-		require(isValidSignatureNow(address(wlSigner), _hash, _signature), "Signature does not match.");
-		_;
-	}
-
 	receive() external payable {}
 
 	function withdraw() public payable onlyOwner {
@@ -132,18 +121,38 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		_unpause();
 	}
 
-	function mint(
-		address _to,
+	function isDataValid(
 		uint256 _createdAt,
 		bytes32 _hash,
 		bytes memory _signature
-	) public payable nonReentrant isNotContract checkMintCount(_createdAt) checkHashSign(_to, _createdAt, _hash, _signature) checkMint(_to) {
+	) public view returns (bool) {
+		bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _hash));
+		require(
+			signedHash.recover(_signature) == wlSigner,
+            "Invalid signature"
+        );
+		
+        bytes32 veriftyHash = keccak256(abi.encodePacked(msg.sender, _createdAt, address(this)));
+		bytes32 signedVeriftyHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", veriftyHash));
+
+		return signedVeriftyHash == signedHash;
+	}
+
+	function mint(
+		uint256 _createdAt,
+		bytes32 _hash,
+		bytes memory _signature
+	) public payable nonReentrant isNotContract checkMintCount(_createdAt) checkMint(msg.sender) {
+		//TODO 발행기준을 year로, year인자도 받기.
+
+		require(isDataValid(_createdAt, _hash, _signature), "Hash does not match.");
 		_tokenIdCounter.increment();
 		uint256 tokenId = _tokenIdCounter.current();
 		tokenYear[tokenId] = _createdAt;
 		_mintCounter(_createdAt);
-		_isMinted[_to] = true;
-		_mint(_to, tokenId);
+		_isMinted[msg.sender] = true;
+		//WL 서명 유효성 유지를 위하여 다른 사람의 opb를 대신 민팅 불가하게 작성됨
+		_mint(msg.sender, tokenId);
 	}
 
 	function setMaximunAmount(uint256[] memory amounts) public onlyOwner {
