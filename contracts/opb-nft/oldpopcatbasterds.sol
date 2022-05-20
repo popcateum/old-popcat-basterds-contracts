@@ -9,10 +9,10 @@ import "../openzeppelin/contracts/security/Pausable.sol";
 import "../openzeppelin/contracts/access/Ownable.sol";
 import "../openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "../openzeppelin/contracts/utils/Counters.sol";
-import "../openzeppelin/contracts/mocks/ECDSAMock.sol";
 import "../openzeppelin/contracts/mocks/SignatureCheckerMock.sol";
+import "../openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 
-contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable, ReentrancyGuard, ECDSAMock, SignatureCheckerMock {
+contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable, ReentrancyGuard, SignatureCheckerMock, EIP712 {
 	using Counters for Counters.Counter;
 
 	Counters.Counter private _2015Counter;
@@ -25,14 +25,32 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 	Counters.Counter private _2022Counter;
 	Counters.Counter private _tokenIdCounter;
 
-	address public wlSigner;
+	address private C1;
+	address private C2;
+	address private C3;
+	address private C4;
+
+	address private wlSigner;
 	string private _baseTokenURI;
-	uint256 constant MAX_AMOUNT = 10000;
+	uint256 private constant MAX_AMOUNT = 10000;
 	bool private isRevealed = false;
+
+	mapping(address => bool) private _isMinted;
 	mapping(uint256 => uint256) private _tokenMaximumAmount;
 	mapping(uint256 => uint256) public tokenYear;
 
-	constructor(address _signer, string memory _uri) ERC721("OldPopcatBasterds", "OPB") {
+	constructor(
+		address _signer,
+		string memory _uri,
+		address _c1,
+		address _c2,
+		address _c3,
+		address _c4
+	) ERC721("OldPopcatBasterds", "OPB") EIP712("OldPopcatBasterds", "1") {
+		C1 = _c1;
+		C2 = _c2;
+		C3 = _c3;
+		C4 = _c4;
 		wlSigner = _signer;
 		setBaseURI(_uri);
 	}
@@ -42,8 +60,10 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		_;
 	}
 
-	modifier mintFee() {
-		require(msg.value >= 0.01 ether);
+	modifier checkMint(address _address) {
+		require(msg.value >= 0.01 ether, "Invalid value.");
+		require(msg.sender == _address, "Invalid address.");
+		require(_isMinted[msg.sender] == false, "Already minted.");
 		_;
 	}
 
@@ -75,19 +95,32 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		_;
 	}
 
-	modifier checkHash(
+	modifier checkHashSign(
 		address _to,
-		uint256 _createAt,
-		bytes32 _hash
+		uint256 _createdAt,
+		bytes32 _hash,
+		bytes memory _signature
 	) {
-		bytes32 veriftyHash = keccak256(abi.encodePacked(_to, _createAt, address(this)));
-		require(toEthSignedMessageHash(_hash) == veriftyHash, "Hash does not match.");
+		bytes32 veriftyHash = keccak256(abi.encodePacked(_to, _createdAt, address(this)));
+		require(_hash == veriftyHash, "Hash does not match.");
+		require(isValidSignatureNow(address(wlSigner), _hash, _signature), "Signature does not match.");
 		_;
 	}
 
-	modifier checkSign(bytes32 _hash, bytes memory _signature) {
-		require(isValidSignatureNow(address(wlSigner), _hash, _signature), "Signature does not match.");
-		_;
+	receive() external payable {}
+
+	function withdraw() public payable onlyOwner {
+		uint256 contractBalance = address(this).balance;
+		uint256 percentage = contractBalance / 100;
+
+		(bool success1, ) = C1.call{ value: percentage * 30 }("");
+		(bool success2, ) = C2.call{ value: percentage * 30 }("");
+		(bool success3, ) = C3.call{ value: percentage * 30 }("");
+		(bool success4, ) = C4.call{ value: percentage * 10 }("");
+
+		if (!success1 || !success2 || !success3 || !success4) {
+			revert("Ether transfer failed");
+		}
 	}
 
 	function pause() public onlyOwner {
@@ -103,11 +136,12 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		uint256 _createdAt,
 		bytes32 _hash,
 		bytes memory _signature
-	) public payable nonReentrant mintFee checkMintCount(_createdAt) checkHash(_to, _createdAt, _hash) checkSign(_hash, _signature) isNotContract {
+	) public payable nonReentrant isNotContract checkMintCount(_createdAt) checkHashSign(_to, _createdAt, _hash, _signature) checkMint(_to) {
 		_tokenIdCounter.increment();
 		uint256 tokenId = _tokenIdCounter.current();
 		tokenYear[tokenId] = _createdAt;
 		_mintCounter(_createdAt);
+		_isMinted[_to] = true;
 		_mint(_to, tokenId);
 	}
 
