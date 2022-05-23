@@ -29,14 +29,11 @@ contract Sale is Ownable, ReentrancyGuard {
 	address private C2;
 	address private C3;
 	address private C4;
-
 	address private wlSigner;
 	uint256 private constant MAX_AMOUNT = 10000;
-	bool private isRevealed = false;
 
 	mapping(address => bool) private _isMinted;
 	mapping(uint256 => uint256) private _tokenMaximumAmount;
-	mapping(uint256 => uint256) public tokenYear;
 
 	modifier isNotContract() {
 		require(msg.sender == tx.origin, "Sender is not EOA");
@@ -45,8 +42,7 @@ contract Sale is Ownable, ReentrancyGuard {
 
 	modifier checkMint(address _address) {
 		require(msg.value >= 0.01 ether, "Invalid value.");
-		require(msg.sender == _address, "Invalid address.");
-		require(_isMinted[msg.sender] == false, "Already minted.");
+		require(_isMinted[_address] == false, "Already minted.");
 		_;
 	}
 
@@ -54,21 +50,21 @@ contract Sale is Ownable, ReentrancyGuard {
 		require(MAX_AMOUNT > _tokenIdCounter.current(), "Maximum number of NFTs reached.");
 
 		bool _isMint;
-		if (_year == 0) {
+		if (_year == 2015) {
 			_isMint = _tokenMaximumAmount[_year] > _2015Counter.current();
-		} else if (_year == 1) {
+		} else if (_year == 2016) {
 			_isMint = _tokenMaximumAmount[_year] > _2016Counter.current();
-		} else if (_year == 2) {
+		} else if (_year == 2017) {
 			_isMint = _tokenMaximumAmount[_year] > _2017Counter.current();
-		} else if (_year == 3) {
+		} else if (_year == 2018) {
 			_isMint = _tokenMaximumAmount[_year] > _2018Counter.current();
-		} else if (_year == 4) {
+		} else if (_year == 2019) {
 			_isMint = _tokenMaximumAmount[_year] > _2019Counter.current();
-		} else if (_year == 5) {
+		} else if (_year == 2020) {
 			_isMint = _tokenMaximumAmount[_year] > _2020Counter.current();
-		} else if (_year == 6) {
+		} else if (_year == 2021) {
 			_isMint = _tokenMaximumAmount[_year] > _2021Counter.current();
-		} else if (_year == 7) {
+		} else if (_year == 2022) {
 			_isMint = _tokenMaximumAmount[_year] > _2022Counter.current();
 		} else {
 			revert("This is not the year that supports minting.");
@@ -79,12 +75,14 @@ contract Sale is Ownable, ReentrancyGuard {
 	}
 
 	constructor(
+		address _opb,
 		address _signer,
 		address _c1,
 		address _c2,
 		address _c3,
 		address _c4
 	) {
+		opb = IOldPopcatBasterds(_opb);
 		wlSigner = _signer;
 		C1 = _c1;
 		C2 = _c2;
@@ -113,16 +111,16 @@ contract Sale is Ownable, ReentrancyGuard {
 		bytes32 _hash,
 		bytes memory _signature
 	) public payable nonReentrant isNotContract checkMintCount(_createdAt) checkMint(msg.sender) {
-		//TODO 발행기준을 year로, year인자도 받기.
+		// TODO 발행기준을 year로, year인자도 받기. _createdAt === year
 
 		require(isDataValid(_createdAt, _hash, _signature), "Hash does not match.");
 		_tokenIdCounter.increment();
 		uint256 tokenId = _tokenIdCounter.current();
-		tokenYear[tokenId] = _createdAt;
 		_mintCounter(_createdAt);
 		_isMinted[msg.sender] = true;
-		//WL 서명 유효성 유지를 위하여 다른 사람의 opb를 대신 민팅 불가하게 작성됨
-		opb.saleMint(msg.sender, tokenId);
+		// WL 서명 유효성 유지를 위하여 다른 사람의 opb를 대신 민팅 불가하게 작성됨
+		// unreaveal 상태의 baseURI를 리턴할 수 있게 _createdAt 데이터 전달
+		opb.saleMint(msg.sender, tokenId, _createdAt);
 	}
 
 	function isDataValid(
@@ -146,21 +144,21 @@ contract Sale is Ownable, ReentrancyGuard {
 	}
 
 	function _mintCounter(uint256 _year) internal {
-		if (_year == 0) {
+		if (_year == 2015) {
 			_2015Counter.increment();
-		} else if (_year == 1) {
+		} else if (_year == 2016) {
 			_2016Counter.increment();
-		} else if (_year == 2) {
+		} else if (_year == 2017) {
 			_2017Counter.increment();
-		} else if (_year == 3) {
+		} else if (_year == 2018) {
 			_2018Counter.increment();
-		} else if (_year == 4) {
+		} else if (_year == 2019) {
 			_2019Counter.increment();
-		} else if (_year == 5) {
+		} else if (_year == 2020) {
 			_2020Counter.increment();
-		} else if (_year == 6) {
+		} else if (_year == 2021) {
 			_2021Counter.increment();
-		} else if (_year == 7) {
+		} else if (_year == 2022) {
 			_2022Counter.increment();
 		} else {
 			revert("This is not the year that supports minting.");
