@@ -115,12 +115,11 @@ contract Sale is Ownable, ReentrancyGuard {
 
 		require(isDataValid(_createdAt, _hash, _signature), "Hash does not match.");
 		_tokenIdCounter.increment();
-		uint256 tokenId = _tokenIdCounter.current();
 		_mintCounter(_createdAt);
 		_isMinted[msg.sender] = true;
 		// WL 서명 유효성 유지를 위하여 다른 사람의 opb를 대신 민팅 불가하게 작성됨
 		// unreaveal 상태의 baseURI를 리턴할 수 있게 _createdAt 데이터 전달
-		opb.saleMint(msg.sender, tokenId, _createdAt);
+		opb.saleMint(msg.sender, _createdAt);
 	}
 
 	function isDataValid(
