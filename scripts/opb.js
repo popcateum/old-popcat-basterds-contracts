@@ -1,9 +1,9 @@
 const hre = require("hardhat");
 
 async function main() {
-
+  const baseURI = 'https://metadata/'
   const Opb = await hre.ethers.getContractFactory("OldPopcatBasterds");
-  const opb = await Opb.deploy();
+  const opb = await Opb.deploy(baseURI);
 
   await opb.deployed();
 
