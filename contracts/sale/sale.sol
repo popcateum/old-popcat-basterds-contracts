@@ -33,7 +33,7 @@ contract Sale is Ownable, ReentrancyGuard {
 	uint256 private constant MAX_AMOUNT = 10000;
 
 	mapping(address => bool) private _isMinted;
-	mapping(uint256 => uint256) private _tokenMaximumAmount;
+	mapping(uint256 => uint256) public tokenMaximumAmount;
 
 	modifier isNotContract() {
 		require(msg.sender == tx.origin, "Sender is not EOA");
@@ -51,21 +51,21 @@ contract Sale is Ownable, ReentrancyGuard {
 
 		bool _isMint;
 		if (_year == 2015) {
-			_isMint = _tokenMaximumAmount[_year] > _2015Counter.current();
+			_isMint = tokenMaximumAmount[_year] > _2015Counter.current();
 		} else if (_year == 2016) {
-			_isMint = _tokenMaximumAmount[_year] > _2016Counter.current();
+			_isMint = tokenMaximumAmount[_year] > _2016Counter.current();
 		} else if (_year == 2017) {
-			_isMint = _tokenMaximumAmount[_year] > _2017Counter.current();
+			_isMint = tokenMaximumAmount[_year] > _2017Counter.current();
 		} else if (_year == 2018) {
-			_isMint = _tokenMaximumAmount[_year] > _2018Counter.current();
+			_isMint = tokenMaximumAmount[_year] > _2018Counter.current();
 		} else if (_year == 2019) {
-			_isMint = _tokenMaximumAmount[_year] > _2019Counter.current();
+			_isMint = tokenMaximumAmount[_year] > _2019Counter.current();
 		} else if (_year == 2020) {
-			_isMint = _tokenMaximumAmount[_year] > _2020Counter.current();
+			_isMint = tokenMaximumAmount[_year] > _2020Counter.current();
 		} else if (_year == 2021) {
-			_isMint = _tokenMaximumAmount[_year] > _2021Counter.current();
+			_isMint = tokenMaximumAmount[_year] > _2021Counter.current();
 		} else if (_year == 2022) {
-			_isMint = _tokenMaximumAmount[_year] > _2022Counter.current();
+			_isMint = tokenMaximumAmount[_year] > _2022Counter.current();
 		} else {
 			revert("This is not the year that supports minting.");
 		}
@@ -107,19 +107,17 @@ contract Sale is Ownable, ReentrancyGuard {
 	}
 
 	function mint(
-		uint256 _createdAt,
+		uint256 _year,
 		bytes32 _hash,
 		bytes memory _signature
-	) public payable nonReentrant isNotContract checkMintCount(_createdAt) checkMint(msg.sender) {
-		// TODO 발행기준을 year로, year인자도 받기. _createdAt === year
-
-		require(isDataValid(_createdAt, _hash, _signature), "Hash does not match.");
+	) public payable nonReentrant isNotContract checkMintCount(_year) checkMint(msg.sender) {
+		require(isDataValid(_year, _hash, _signature), "Hash does not match.");
 		_tokenIdCounter.increment();
-		_mintCounter(_createdAt);
+		_mintCounter(_year);
 		_isMinted[msg.sender] = true;
 		// WL 서명 유효성 유지를 위하여 다른 사람의 opb를 대신 민팅 불가하게 작성됨
-		// unreaveal 상태의 baseURI를 리턴할 수 있게 _createdAt 데이터 전달
-		opb.saleMint(msg.sender, _createdAt);
+		// unreaveal 상태의 baseURI를 리턴할 수 있게 _year 데이터 전달
+		opb.saleMint(msg.sender, _year);
 	}
 
 	function isDataValid(
@@ -137,8 +135,10 @@ contract Sale is Ownable, ReentrancyGuard {
 	}
 
 	function setMaximunAmount(uint256[] memory amounts) public onlyOwner {
+		uint256 _year = 2015;
 		for (uint256 i = 0; i < amounts.length; i++) {
-			_tokenMaximumAmount[i] = amounts[i];
+			tokenMaximumAmount[_year] = amounts[i];
+			_year += 1;
 		}
 	}
 
