@@ -10,9 +10,8 @@ import "../openzeppelin/contracts/access/Ownable.sol";
 import "../openzeppelin/contracts/token/ERC721/extensions/ERC721Burnable.sol";
 import "../openzeppelin/contracts/utils/Counters.sol";
 import "../openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
-import "../openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 
-contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable, ReentrancyGuard, EIP712 {
+contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC721Burnable, ReentrancyGuard {
 	using Counters for Counters.Counter;
 	using SignatureChecker for address;
 	using ECDSA for bytes32;
@@ -32,6 +31,7 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 	address private C3;
 	address private C4;
 
+	address public minterContract;
 	address private wlSigner;
 	string private _baseTokenURI;
 	uint256 private constant MAX_AMOUNT = 10000;
@@ -48,13 +48,18 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		address _c2,
 		address _c3,
 		address _c4
-	) ERC721("OldPopcatBasterds", "OPB") EIP712("OldPopcatBasterds", "1") {
+	) ERC721("OldPopcatBasterds", "OPB") {
 		C1 = _c1;
 		C2 = _c2;
 		C3 = _c3;
 		C4 = _c4;
 		wlSigner = _signer;
 		setBaseURI(_uri);
+	}
+
+	modifier onlyMinter() {
+		require(_msgSender() == minterContract);
+		_;
 	}
 
 	modifier isNotContract() {
@@ -127,15 +132,17 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 		bytes memory _signature
 	) public view returns (bool) {
 		bytes32 signedHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", _hash));
-		require(
-			signedHash.recover(_signature) == wlSigner,
-            "Invalid signature"
-        );
-		
-        bytes32 veriftyHash = keccak256(abi.encodePacked(msg.sender, _createdAt, address(this)));
+		require(signedHash.recover(_signature) == wlSigner, "Invalid signature");
+
+		bytes32 veriftyHash = keccak256(abi.encodePacked(msg.sender, _createdAt, address(this)));
 		bytes32 signedVeriftyHash = keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", veriftyHash));
 
 		return signedVeriftyHash == signedHash;
+	}
+
+	// !! Sale Contract Only mintable
+	function saleMint(address to, uint256 tokenId) external onlyMinter {
+		_mint(to, tokenId);
 	}
 
 	function mint(
@@ -175,6 +182,10 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 
 	function setIsReveal(bool _isReveal) external onlyOwner {
 		isRevealed = _isReveal;
+	}
+
+	function setMinterContract(address saleContract) public onlyOwner {
+		minterContract = saleContract;
 	}
 
 	function _mintCounter(uint256 _year) internal {
