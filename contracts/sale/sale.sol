@@ -15,14 +15,14 @@ contract Sale is Ownable, ReentrancyGuard {
 
 	IOldPopcatBasterds public opb;
 
-	Counters.Counter private _2015Counter;
-	Counters.Counter private _2016Counter;
-	Counters.Counter private _2017Counter;
-	Counters.Counter private _2018Counter;
-	Counters.Counter private _2019Counter;
-	Counters.Counter private _2020Counter;
-	Counters.Counter private _2021Counter;
-	Counters.Counter private _2022Counter;
+	Counters.Counter public _2015Counter;
+	Counters.Counter public _2016Counter;
+	Counters.Counter public _2017Counter;
+	Counters.Counter public _2018Counter;
+	Counters.Counter public _2019Counter;
+	Counters.Counter public _2020Counter;
+	Counters.Counter public _2021Counter;
+	Counters.Counter public _2022Counter;
 	Counters.Counter private _tokenIdCounter;
 
 	address private C1;
