@@ -32,7 +32,7 @@ contract Sale is Ownable, ReentrancyGuard {
 	address private wlSigner;
 	uint256 private constant MAX_AMOUNT = 10000;
 
-	mapping(address => bool) private _isMinted;
+	mapping(address => bool) public _isMinted;
 	mapping(uint256 => uint256) public tokenMaximumAmount;
 
 	modifier isNotContract() {
