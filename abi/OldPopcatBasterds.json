@@ -5,6 +5,11 @@
         "internalType": "string",
         "name": "_uri",
         "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_maxAmount",
+        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
