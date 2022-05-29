@@ -15,15 +15,15 @@ contract Sale is Ownable, ReentrancyGuard {
 
 	IOldPopcatBasterds public opb;
 
-	Counters.Counter public _2015Counter;
-	Counters.Counter public _2016Counter;
-	Counters.Counter public _2017Counter;
-	Counters.Counter public _2018Counter;
-	Counters.Counter public _2019Counter;
-	Counters.Counter public _2020Counter;
-	Counters.Counter public _2021Counter;
-	Counters.Counter public _2022Counter;
 	Counters.Counter private _tokenIdCounter;
+	Counters.Counter private _2015Counter;
+	Counters.Counter private _2016Counter;
+	Counters.Counter private _2017Counter;
+	Counters.Counter private _2018Counter;
+	Counters.Counter private _2019Counter;
+	Counters.Counter private _2020Counter;
+	Counters.Counter private _2021Counter;
+	Counters.Counter private _2022Counter;
 
 	address private C1;
 	address private C2;
@@ -32,7 +32,19 @@ contract Sale is Ownable, ReentrancyGuard {
 	address private wlSigner;
 	uint256 private constant MAX_AMOUNT = 10000;
 
-	mapping(address => bool) public _isMinted;
+	struct Count {
+		uint256 _all;
+		uint256 _2015;
+		uint256 _2016;
+		uint256 _2017;
+		uint256 _2018;
+		uint256 _2019;
+		uint256 _2020;
+		uint256 _2021;
+		uint256 _2022;
+	}
+
+	mapping(address => bool) public isMinted;
 	mapping(uint256 => uint256) public tokenMaximumAmount;
 
 	modifier isNotContract() {
@@ -42,7 +54,7 @@ contract Sale is Ownable, ReentrancyGuard {
 
 	modifier checkMint(address _address) {
 		require(msg.value >= 0.01 ether, "Invalid value.");
-		require(_isMinted[_address] == false, "Already minted.");
+		require(isMinted[_address] == false, "Already minted.");
 		_;
 	}
 
@@ -92,7 +104,7 @@ contract Sale is Ownable, ReentrancyGuard {
 
 	receive() external payable {}
 
-	function withdraw() public payable onlyOwner {
+	function withdraw() public payable {
 		uint256 contractBalance = address(this).balance;
 		uint256 percentage = contractBalance / 100;
 
@@ -114,10 +126,25 @@ contract Sale is Ownable, ReentrancyGuard {
 		require(isDataValid(_year, _hash, _signature), "Hash does not match.");
 		_tokenIdCounter.increment();
 		_mintCounter(_year);
-		_isMinted[msg.sender] = true;
+		isMinted[msg.sender] = true;
 		// WL 서명 유효성 유지를 위하여 다른 사람의 opb를 대신 민팅 불가하게 작성됨
 		// unreaveal 상태의 baseURI를 리턴할 수 있게 _year 데이터 전달
 		opb.saleMint(msg.sender, _year);
+	}
+
+	function getMintState() public view returns (Count memory) {
+		return
+			Count(
+				_tokenIdCounter.current(),
+				_2015Counter.current(),
+				_2016Counter.current(),
+				_2017Counter.current(),
+				_2018Counter.current(),
+				_2019Counter.current(),
+				_2020Counter.current(),
+				_2021Counter.current(),
+				_2022Counter.current()
+			);
 	}
 
 	function isDataValid(
