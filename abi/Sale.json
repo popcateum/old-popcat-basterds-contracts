@@ -56,122 +56,59 @@
   },
   {
     "inputs": [],
-    "name": "_2015Counter",
+    "name": "getMintState",
     "outputs": [
       {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_2016Counter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_2017Counter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_2018Counter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_2019Counter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_2020Counter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_2021Counter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "_2022Counter",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
+        "components": [
+          {
+            "internalType": "uint256",
+            "name": "_all",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_2015",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_2016",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_2017",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_2018",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_2019",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_2020",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_2021",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_2022",
+            "type": "uint256"
+          }
+        ],
+        "internalType": "struct Sale.Count",
         "name": "",
-        "type": "address"
-      }
-    ],
-    "name": "_isMinted",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
+        "type": "tuple"
       }
     ],
     "stateMutability": "view",
@@ -196,6 +133,25 @@
       }
     ],
     "name": "isDataValid",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "isMinted",
     "outputs": [
       {
         "internalType": "bool",
