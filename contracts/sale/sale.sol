@@ -33,7 +33,6 @@ contract Sale is Ownable, ReentrancyGuard {
 	uint256 private constant MAX_AMOUNT = 10000;
 
 	struct Count {
-		uint256 _all;
 		uint256 _2015;
 		uint256 _2016;
 		uint256 _2017;
@@ -135,7 +134,6 @@ contract Sale is Ownable, ReentrancyGuard {
 	function getMintState() public view returns (Count memory) {
 		return
 			Count(
-				_tokenIdCounter.current(),
 				_2015Counter.current(),
 				_2016Counter.current(),
 				_2017Counter.current(),
