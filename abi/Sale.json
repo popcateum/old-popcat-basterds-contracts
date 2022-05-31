@@ -62,11 +62,6 @@
         "components": [
           {
             "internalType": "uint256",
-            "name": "_all",
-            "type": "uint256"
-          },
-          {
-            "internalType": "uint256",
             "name": "_2015",
             "type": "uint256"
           },
