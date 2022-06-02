@@ -5,5 +5,5 @@
 
 
 #### test CA (Goerli)
-- OldPopcatBasterds deployed to: 0x0fBF385B7045bFA72062c875bE92FA988d70F4aa
-- Sale deployed to: 0xeFa57676a0eA186e6e7daf4BAE4a274d0cA5D95B
+- OldPopcatBasterds deployed to: 0xFB2d7eaF48bdBCdb2E519529420bA1EBdCAc73c4
+- Sale deployed to: 0x6BDb5aa5f9A135b66DD910ba4D15f8Fb15FcE5ed
