@@ -25,10 +25,6 @@ contract Sale is Ownable, ReentrancyGuard {
 	Counters.Counter private _2021Counter;
 	Counters.Counter private _2022Counter;
 
-	address private C1;
-	address private C2;
-	address private C3;
-	address private C4;
 	address private wlSigner;
 	uint256 private constant MAX_AMOUNT = 10000;
 
@@ -98,11 +94,11 @@ contract Sale is Ownable, ReentrancyGuard {
 	) public payable nonReentrant isNotContract checkMintCount(_year) checkMint(msg.sender) {
 		require(isDataValid(_year, _hash, _signature), "Hash does not match.");
 		_tokenIdCounter.increment();
-		_mintCounter(_year);
+		uint256 _tokenId = _mintCounter(_year);
 		isMinted[msg.sender] = true;
 		// WL 서명 유효성 유지를 위하여 다른 사람의 opb를 대신 민팅 불가하게 작성됨
 		// unreaveal 상태의 baseURI를 리턴할 수 있게 _year 데이터 전달
-		opb.saleMint(msg.sender, _year);
+		opb.saleMint(msg.sender, _tokenId, _year);
 	}
 
 	function getMintState() public view returns (Count memory) {
@@ -141,23 +137,31 @@ contract Sale is Ownable, ReentrancyGuard {
 		}
 	}
 
-	function _mintCounter(uint256 _year) internal {
+	function _mintCounter(uint256 _year) internal returns (uint256) {
 		if (_year == 2015) {
 			_2015Counter.increment();
+			return 0 + _2015Counter.current();
 		} else if (_year == 2016) {
 			_2016Counter.increment();
+			return 100 + _2016Counter.current();
 		} else if (_year == 2017) {
 			_2017Counter.increment();
+			return 300 + _2017Counter.current();
 		} else if (_year == 2018) {
 			_2018Counter.increment();
+			return 700 + _2018Counter.current();
 		} else if (_year == 2019) {
 			_2019Counter.increment();
+			return 2000 + _2019Counter.current();
 		} else if (_year == 2020) {
 			_2020Counter.increment();
+			return 3500 + _2020Counter.current();
 		} else if (_year == 2021) {
 			_2021Counter.increment();
+			return 5500 + _2021Counter.current();
 		} else if (_year == 2022) {
 			_2022Counter.increment();
+			return 8000 + _2022Counter.current();
 		} else {
 			revert("This is not the year that supports minting.");
 		}
