@@ -52,7 +52,6 @@ contract Sale is Ownable, ReentrancyGuard {
 	}
 
 	modifier checkMint(address _address) {
-		require(msg.value >= 0.01 ether, "Invalid value.");
 		require(isMinted[_address] == false, "Already minted.");
 		_;
 	}
@@ -85,37 +84,12 @@ contract Sale is Ownable, ReentrancyGuard {
 		_;
 	}
 
-	constructor(
-		address _opb,
-		address _signer,
-		address _c1,
-		address _c2,
-		address _c3,
-		address _c4
-	) {
+	constructor(address _opb, address _signer) {
 		opb = IOldPopcatBasterds(_opb);
 		wlSigner = _signer;
-		C1 = _c1;
-		C2 = _c2;
-		C3 = _c3;
-		C4 = _c4;
 	}
 
 	receive() external payable {}
-
-	function withdraw() public payable {
-		uint256 contractBalance = address(this).balance;
-		uint256 percentage = contractBalance / 100;
-
-		(bool success1, ) = C1.call{ value: percentage * 30 }("");
-		(bool success2, ) = C2.call{ value: percentage * 30 }("");
-		(bool success3, ) = C3.call{ value: percentage * 30 }("");
-		(bool success4, ) = C4.call{ value: percentage * 10 }("");
-
-		if (!success1 || !success2 || !success3 || !success4) {
-			revert("Ether transfer failed");
-		}
-	}
 
 	function mint(
 		uint256 _year,
