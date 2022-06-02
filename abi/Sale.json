@@ -10,26 +10,6 @@
         "internalType": "address",
         "name": "_signer",
         "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_c1",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_c2",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_c3",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_c4",
-        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -257,16 +237,5 @@
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "withdraw",
-    "outputs": [],
-    "stateMutability": "payable",
-    "type": "function"
-  },
-  {
-    "stateMutability": "payable",
-    "type": "receive"
   }
 ]

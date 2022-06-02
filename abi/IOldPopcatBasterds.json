@@ -8,7 +8,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_createdAt",
+        "name": "_tokenId",
         "type": "uint256"
       }
     ],

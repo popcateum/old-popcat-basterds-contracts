@@ -386,7 +386,7 @@
       },
       {
         "internalType": "uint256",
-        "name": "_createdAt",
+        "name": "_tokenId",
         "type": "uint256"
       }
     ],
@@ -422,19 +422,6 @@
       }
     ],
     "name": "setBaseURI",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "bool",
-        "name": "_isReveal",
-        "type": "bool"
-      }
-    ],
-    "name": "setIsReveal",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -554,25 +541,6 @@
         "internalType": "string",
         "name": "",
         "type": "string"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "name": "tokenYear",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
