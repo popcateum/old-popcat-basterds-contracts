@@ -85,8 +85,6 @@ contract Sale is Ownable, ReentrancyGuard {
 		wlSigner = _signer;
 	}
 
-	receive() external payable {}
-
 	function mint(
 		uint256 _year,
 		bytes32 _hash,
@@ -98,7 +96,7 @@ contract Sale is Ownable, ReentrancyGuard {
 		isMinted[msg.sender] = true;
 		// WL 서명 유효성 유지를 위하여 다른 사람의 opb를 대신 민팅 불가하게 작성됨
 		// unreaveal 상태의 baseURI를 리턴할 수 있게 _year 데이터 전달
-		opb.saleMint(msg.sender, _tokenId, _year);
+		opb.saleMint(msg.sender, _tokenId);
 	}
 
 	function getMintState() public view returns (Count memory) {
