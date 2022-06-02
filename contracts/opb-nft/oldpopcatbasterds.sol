@@ -20,6 +20,7 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 	constructor(string memory _uri, uint256 _maxAmount) ERC721("OldPopcatBasterds", "OPB") {
 		setBaseURI(_uri);
 		setMaxAmount(_maxAmount);
+		_tokenIdCounter.increment();
 	}
 
 	modifier checkMaxAmount() {
