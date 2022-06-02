@@ -16,9 +16,6 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 	uint256 public maxAmount;
 	string private _baseTokenURI;
 	address public minterContract;
-	bool private isRevealed = false;
-
-	mapping(uint256 => uint256) public tokenYear;
 
 	constructor(string memory _uri, uint256 _maxAmount) ERC721("OldPopcatBasterds", "OPB") {
 		setBaseURI(_uri);
@@ -44,27 +41,18 @@ contract OldPopcatBasterds is ERC721, ERC721Enumerable, Pausable, Ownable, ERC72
 	}
 
 	// !! Sale Contract Only mintable
-	function saleMint(address to, uint256 _createdAt) external checkMaxAmount onlyMinter {
+	function saleMint(address to, uint256 _tokenId) external checkMaxAmount onlyMinter {
 		_tokenIdCounter.increment();
-		uint256 tokenId = _tokenIdCounter.current();
-		tokenYear[tokenId] = _createdAt;
-		_mint(to, tokenId);
+		_mint(to,_tokenId);
 	}
 
 	function tokenURI(uint256 _tokenId) public view override returns (string memory) {
 		require(_exists(_tokenId), "ERC721Metadata: URI query for nonexistent token");
-		if (!isRevealed) {
-			return string(abi.encodePacked(_baseURI(), Strings.toString(tokenYear[_tokenId])));
-		}
 		return string(abi.encodePacked(_baseURI(), Strings.toString(_tokenId)));
 	}
 
 	function setBaseURI(string memory _uri) public onlyOwner {
 		_baseTokenURI = _uri;
-	}
-
-	function setIsReveal(bool _isReveal) external onlyOwner {
-		isRevealed = _isReveal;
 	}
 
 	function setMinterContract(address saleContract) public onlyOwner {
